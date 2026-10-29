@@ -5,7 +5,6 @@ var router = express.Router();
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
-
 router.get('/f90', function(req, res, next) {
     res.render('bmw', {
         title: "M5 f90",
