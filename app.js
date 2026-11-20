@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var data = require('./data.js');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -32,14 +33,37 @@ app.use(function(req, res, next) {
 
 // Глобальный обработчик ошибок (должен быть ПОСЛЕ всех роутов)
 app.use(function(err, req, res, next) {
-  // Локальные переменные для шаблона
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // Установка статуса ответа
   res.status(err.status || 500);
-
-   res.render('error',{title: 'BMW'});
+  res.render('error', { title: 'BMW' });
 });
+
+// --- Заливка данных в MongoDB при старте сервера ---
+const { MongoClient } = require('mongodb');
+const url = 'mongodb://127.0.0.1:27017';
+
+async function fillData() {
+  let client;
+  try {
+    client = await new MongoClient(url).connect();
+    const db = client.db('test2026');
+    const collection = db.collection('models');
+
+    const count = await collection.countDocuments();
+    if (count === 0) {
+      await collection.insertMany(data);
+      console.log('Данные загружены в базу test2026');
+    } else {
+      console.log('Коллекция models уже заполнена:', count, 'документов');
+    }
+  } catch (err) {
+    console.error('Ошибка загрузки данных:', err.message);
+  } finally {
+    if (client) await client.close();
+  }
+}
+fillData();
+// ---------------------------------------------------
 
 module.exports = app;
