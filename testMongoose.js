@@ -2,8 +2,14 @@ const mongoose = require('mongoose');
 
 mongoose.connect('mongodb://127.0.0.1:27017/testMongoose2026');
 
-const Model = mongoose.model('Model', { name: String });
+var schema = mongoose.Schema({ name: String })
 
-const m5 = new Model({ name: 'M5 F90' });
+schema.methods.meow = function(){
+  console.log(this.name + " сигналит")
+}
 
-m5.save().then(() => console.log('Бип'));
+const Model = mongoose.model('Model', schema);
+
+const m3 = new Model({ name: 'M3 E30' });
+
+m3.save().then(() => m3.meow());
